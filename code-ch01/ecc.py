@@ -23,9 +23,11 @@ class FieldElement:
 
     def __ne__(self, other):
         # this should be the inverse of the == operator
-        raise NotImplementedError
-
+        if other is None:
+            return True
+        return not (self == other)  
     # tag::source2[]
+
     def __add__(self, other):
         if self.prime != other.prime:  # <1>
             raise TypeError('Cannot add two numbers in different Fields')
