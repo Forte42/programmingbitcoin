@@ -41,7 +41,8 @@ class FieldElement:
         # self.num and other.num are the actual values
         # self.prime is what we need to mod against
         # We return an element of the same class
-        raise NotImplementedError
+        num = (self.num - other.num) % self.prime
+        return self.__class__(num, self.prime)  
 
     def __mul__(self, other):
         if self.prime != other.prime:
