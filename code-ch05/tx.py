@@ -118,10 +118,15 @@ class Tx:
         for _ in range (num_inputs):
             inputs.append(TxIn.parse(s))
         # num_outputs is a varint, use read_varint(s)
+        num_outputs = read_varint(s)
         # parse num_outputs number of TxOuts
+        outputs = []
+        for _ in range (num_outputs):
+            outputs.append(TxOut.parse(s))
         # locktime is an integer in 4 bytes, little-endian
+        locktime = little_endian_to_int(s.read(4))
         # return an instance of the class (see __init__ for args)
-        return cls(version, inputs, None, None)
+        return cls(version, inputs, outputs, locktime)
 
     # tag::source6[]
     def serialize(self):
@@ -140,10 +145,16 @@ class Tx:
     def fee(self):
         '''Returns the fee of this transaction in satoshi'''
         # initialize input sum and output sum
+        input_sum = 0
+        output_sum = 0
         # use TxIn.value() to sum up the input amounts
+        for tx_in in self.tx_ins:
+            input_sum += tx_in.value()
         # use TxOut.amount to sum up the output amounts
-        # fee is input sum - output sum
-        raise NotImplementedError
+        for tx_out in self.tx_outs:
+            output_sum += tx_out.amount
+        # return the fee of the transaction
+        return input_sum - output_sum
 
 
 # tag::source2[]
@@ -227,9 +238,11 @@ class TxOut:
         return a TxOut object
         '''
         # amount is an integer in 8 bytes, little endian
+        amount = little_endian_to_int(s.read(8))
         # use Script.parse to get the ScriptPubKey
+        ScriptPubKey = Script.parse(s)
         # return an instance of the class (see __init__ for args)
-        raise NotImplementedError
+        return cls(amount, ScriptPubKey)
 
     # tag::source4[]
     def serialize(self):  # <1>
