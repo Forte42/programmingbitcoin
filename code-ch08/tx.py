@@ -172,8 +172,11 @@ class Tx:
             # if the input index is the one we're signing
             if i == input_index:
                 # if the RedeemScript was passed in, that's the ScriptSig
+                if redeem_script:
+                    script_sig = redeem_script
                 # otherwise the previous tx's ScriptPubkey is the ScriptSig
-                script_sig = tx_in.script_pubkey(self.testnet)
+                else:
+                    script_sig = tx_in.script_pubkey(self.testnet)
             # Otherwise, the ScriptSig is empty
             else:
                 script_sig = None
