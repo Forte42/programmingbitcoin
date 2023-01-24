@@ -210,7 +210,7 @@ class Tx:
         # check to see if the ScriptPubkey is a p2sh using
         # Script.is_p2sh_script_pubkey()
         if Script.is_p2sh_script_pubkey(script_pubkey) == True:
-            # the last cmd in a p2sh is the RedeemScript
+            # the last cmd in a P2SH is the RedeemScript
             cmd = tx_in.script_sig.cmds[-1]
             # prepend the length of the RedeemScript using encode_varint
             raw_redeem = encode_varint(len(cmd)) + cmd
