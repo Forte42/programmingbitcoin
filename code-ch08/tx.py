@@ -209,13 +209,18 @@ class Tx:
         script_pubkey = tx_in.script_pubkey(testnet=self.testnet)
         # check to see if the ScriptPubkey is a p2sh using
         # Script.is_p2sh_script_pubkey()
+        if Script.is_p2sh_script_pubkey(script_pubkey) == True:
             # the last cmd in a p2sh is the RedeemScript
+            cmd = tx_in.script_sig.cmds[-1]
             # prepend the length of the RedeemScript using encode_varint
+            raw_redeem = encode_varint(len(cmd)) + cmd
             # parse the RedeemScript
+            redeem_script = Script.parse(BytesIO(raw_redeem))
         # otherwise RedeemScript is None
+        else: redeem_script = None
         # get the signature hash (z)
         # pass the RedeemScript to the sig_hash method
-        z = self.sig_hash(input_index)
+        z = self.sig_hash(input_index, redeem_script)
         # combine the current ScriptSig and the previous ScriptPubKey
         combined = tx_in.script_sig + script_pubkey
         # evaluate the combined script
