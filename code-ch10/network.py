@@ -146,19 +146,36 @@ class VersionMessage:
     def serialize(self):
         '''Serialize this message to send over the network'''
         # version is 4 bytes little endian
+        result = int_to_little_endian(self.version, 4)
         # services is 8 bytes little endian
+        result += int_to_little_endian(self.services, 8)
         # timestamp is 8 bytes little endian
+        result += int_to_little_endian(self.timestamp, 8)
         # receiver services is 8 bytes little endian
+        result += int_to_little_endian(self.receiver_services, 8)
         # IPV4 is 10 00 bytes and 2 ff bytes then receiver ip
+        result += b'\x00' * 10 + b'\xff\xff' + self.receiver_ip
         # receiver port is 2 bytes, big endian
+        result += self.receiver_port.to_bytes(2, 'big')
         # sender services is 8 bytes little endian
+        result += int_to_little_endian(self.sender_services, 8)
         # IPV4 is 10 00 bytes and 2 ff bytes then sender ip
+        result += b'\x00' * 10 + b'\xff\xff' + self.sender_ip
         # sender port is 2 bytes, big endian
+        result += self.sender_port.to_bytes(2, 'big')
         # nonce should be 8 bytes
+        result += self.nonce
         # useragent is a variable string, so varint first
+        result += encode_varint(len(self.user_agent))
+        result += self.user_agent
         # latest block is 4 bytes little endian
+        result += int_to_little_endian(self.latest_block, 4)
         # relay is 00 if false, 01 if true
-        raise NotImplementedError
+        if self.relay:
+            result += b'\x01'
+        else:
+            result += b'\x00'
+        return result
 
 
 class VersionMessageTest(TestCase):
@@ -233,10 +250,14 @@ class GetHeadersMessage:
     def serialize(self):
         '''Serialize this message to send over the network'''
         # protocol version is 4 bytes little-endian
+        result = int_to_little_endian(self.version, 4)
         # number of hashes is a varint
+        result += encode_varint(self.num_hashes)
         # start block is in little-endian
+        result += self.start_block[::-1]
         # end block is also in little-endian
-        raise NotImplementedError
+        result += self.end_block[::-1]
+        return result
 
 
 class GetHeadersMessageTest(TestCase):
@@ -298,9 +319,11 @@ class SimpleNode:
         '''Do a handshake with the other node.
         Handshake is sending a version message and getting a verack back.'''
         # create a version message
+        version = VersionMessage()
         # send the command
+        self.send(version)
         # wait for a verack message
-        raise NotImplementedError
+        self.wait_for(VerAckMessage)
     # tag::source4[]
 
     def send(self, message):  # <1>
