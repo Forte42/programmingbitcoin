@@ -1,4 +1,5 @@
 from unittest import TestCase, TestSuite, TextTestRunner
+from ripemd import ripemd160
 
 import hashlib
 
@@ -19,7 +20,7 @@ def run(test):
 
 def hash160(s):
     '''sha256 followed by ripemd160'''
-    return hashlib.new('ripemd160', hashlib.sha256(s).digest()).digest()
+    return ripemd160((hashlib.sha256(s).digest()))
 
 
 def hash256(s):

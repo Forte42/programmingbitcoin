@@ -33,6 +33,7 @@ class TxFetcher:
             response = requests.get(url)
             try:
                 raw = bytes.fromhex(response.text.strip())
+                print("Raw: ", raw)
             except ValueError:
                 raise ValueError('unexpected response: {}'.format(response.text))
             # make sure the tx we got matches to the hash we requested
